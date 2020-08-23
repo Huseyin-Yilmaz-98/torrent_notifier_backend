@@ -1,10 +1,11 @@
 const nodemailer = require('nodemailer');
+const info = require("./info.json");
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'ylmzhsyn1998@gmail.com',
-        pass: '1963dw1963'
+        user: info["email-username"],
+        pass: info["email-password"]
     }
 });
 
@@ -77,11 +78,11 @@ module.exports.forgot_password = (req, res, dbinfo, knex) => {
                             .into("password_reset_requests")
                             .returning("prr_id")
                             .then(() => {
-                                const url=new URL("/reset_password","http://localhost:3000");
+                                const url=new URL("/reset_password", info["frontend-address"]);
                                 url.searchParams.append("email",email);
                                 url.searchParams.append("code",randomCode.toString());
                                 const mailOptions = {
-                                    from: 'ylmzhsyn1998@gmail.com',
+                                    from: info["email-username"],
                                     to: email,
                                     subject: 'Forgot Password',
                                     text: url.href
