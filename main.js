@@ -16,6 +16,7 @@ const session = require("express-session");
 const { logout } = require("./logout");
 const { check_status } = require("./check_status");
 const info = require("./info.json");
+const { get_request_list } = require("./get_request_list");
 const app = express();
 
 app.use(express.json());
@@ -47,6 +48,7 @@ app.post("/password_reset_code_check", (req, res) => password_reset_code_check(r
 app.post("/change_password", (req, res) => change_password(req, res, dbinfo, knex, bcrypt));
 app.get("/logout", (req, res) => logout(req, res));
 app.get("/check_status", (req, res) => check_status(req, res, dbinfo, knex));
+app.get("/get_request_list", (req, res) => get_request_list(req, res, dbinfo, knex));
 
 
 app.listen(3333, () => console.log("app is running"));
