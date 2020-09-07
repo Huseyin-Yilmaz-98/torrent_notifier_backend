@@ -1,11 +1,3 @@
-//function to validate email string
-const ValidateEmail = (mail) => {
-    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
-        return (true)
-    }
-    return (false)
-}
-
 module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
     //create response
     const response = {
@@ -62,8 +54,9 @@ module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
         return;
     }
 
-    //check if email pattern is correct
-    if (!ValidateEmail(email)) {
+    //check if email contains @ and .
+    const email_split = email.split("@");
+    if (email_split.length !== 2 || email_split[0].length === 0 || email_split.split(".").length !== 2) { //check if email contains @ and .
         response.status = "email_wrong_pattern";
         res.status(400).json(response);
         return;
@@ -98,21 +91,28 @@ module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
         }).then(() => {
             //if email is not registered, try registering the user
             if (isRegistered === false) {
+                const randomCode = Math.floor(100000 + Math.random() * 900000);
                 db.insert({
                     email: email,
                     password_hash: hash,
                     joined_date: new Date(),
-                    name: name
+                    name: name,
+                    activation_code: randomCode,
+                    is_activated: false
                 })
                     .into("users")
-                    .returning(["uid", "email", "name", "joined_date"])
-                    .then(data => {
-                        response.user = data[0];
-                        response.success = true;
-                        response.status = "OK";
-                        req.session.user_id = data[0].uid;
-                        res.json(response);
-                        db.destroy();
+                    .then((data) => {
+                        db("users")
+                            .select("uid", "email", "name", "joined_date")
+                            .where("uid", "=", data[0])
+                            .then(data => {
+                                response.user = data[0];
+                                response.success = true;
+                                response.status = "OK";
+                                req.session.user_id = data[0].uid;
+                                res.json(response);
+                                db.destroy();
+                            })
                     })
                     .catch(err => {
                         console.log(err);

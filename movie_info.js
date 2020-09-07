@@ -4,30 +4,28 @@ const { json } = require('express');
 
 const get_script = (body => {
     const dom = new JSDOM(body);
-    let sj = "";
     const scripts = dom.window.document.querySelectorAll('script');
     for (let i = 0; i < scripts.length; i++) {
         if (scripts[i].textContent.indexOf("\"name\":") !== -1) {
-            sj = scripts[i].textContent;
-            break;
+            return scripts[i].textContent;
         }
     }
-    return sj;
+    return "";
 });
 
 //adds movie to the database
 const add_to_database = (response, db, movie_id) => {
     db.insert({
-        mid: movie_id,
-        mname: response.movie_info.name,
-        msum: response.movie_info.sum,
-        mrating: response.movie_info.rating,
-        myear: response.movie_info.year,
-        mposter: response.movie_info.poster,
-        mtype: response.movie_info.type,
+        tid: movie_id,
+        name: response.movie_info.name,
+        sum: response.movie_info.sum,
+        rating: response.movie_info.rating,
+        year: response.movie_info.year,
+        poster: response.movie_info.poster,
+        type: response.movie_info.type,
         added_date: new Date()
     })
-        .into("movies")
+        .into("titles")
         .then(() => {
             console.log("added " + movie_id);
         })
@@ -59,7 +57,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
     }
 
 
-    //get email and id and movie_id from body
+    //get movie_id from body
     const { movie_id } = req.body;
 
 
@@ -76,23 +74,24 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
 
     let isSuccessful = false;
     db.select("*")
-        .from("movies")
-        .where("mid", "=", movie_id)
+        .from("titles")
+        .where("tid", "=", movie_id)
         .then(data => {
             if (data.length > 0) {
                 response.movie_info.movie_id = movie_id;
-                response.movie_info.name = data[0].mname;
-                response.movie_info.sum = data[0].msum;
-                response.movie_info.rating = data[0].mrating;
-                response.movie_info.year = data[0].myear;
-                response.movie_info.poster = data[0].mposter;
-                response.movie_info.type = data[0].mtype;
+                response.movie_info.name = data[0].name;
+                response.movie_info.sum = data[0].sum;
+                response.movie_info.rating = data[0].rating;
+                response.movie_info.year = data[0].year;
+                response.movie_info.poster = data[0].poster;
+                response.movie_info.type = data[0].type;
                 isSuccessful = true;
                 console.log("from database");
                 response.status = "OK";
                 response.success = true;
                 db.select("*")
-                    .from("releases")
+                    .from("versions")
+                    .orderBy("level","desc")
                     .then(formats => {
                         response.formats = formats;
                         res.json(response);
@@ -116,7 +115,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
                             response.movie_info.name = movie_info.name ? movie_info.name : "-";
                             response.movie_info.sum = movie_info.description ? movie_info.description : "-";
                             response.movie_info.rating = movie_info.aggregateRating ? (movie_info.aggregateRating.ratingValue ? movie_info.aggregateRating.ratingValue : "-") : "-";
-                            response.movie_info.year = movie_info.datePublished ? movie_info.datePublished.split("-")[0] : "-1";
+                            response.movie_info.year = movie_info.datePublished ? movie_info.datePublished.split("-")[0] : "0000";
                             response.movie_info.poster = movie_info.image ? movie_info.image : "-";
                             response.movie_info.type = movie_info["@type"] ? movie_info["@type"] : "-";
                             isSuccessful = true;
@@ -128,7 +127,8 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
                             response.status = "OK";
                             response.success = true;
                             db.select("*")
-                                .from("releases")
+                                .from("versions")
+                                .orderBy("level","desc")
                                 .then(formats => {
                                     response.formats = formats;
                                     res.json(response);
@@ -139,7 +139,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
             }
         })
         .catch(err => {
-            response.status = "fetch_error";
+            response.status = "db_error";
             res.status(400).json(response);
             db.destroy();
         });

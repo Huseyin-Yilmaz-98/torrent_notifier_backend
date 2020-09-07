@@ -1,13 +1,15 @@
 const fetch = require('node-fetch');
-const {changed_letters}=require("./changed_letters");
+const { changed_letters } = require("./changed_letters");
 
 module.exports.get_suggestions = (req, res) => {
     //create response
     const response = {
+        status: "OK",
         suggestions: []
     }
 
     if (!req.session.user_id) {
+        response.status = "not_signed_in";
         res.status(400).json(response);
         return;
     }

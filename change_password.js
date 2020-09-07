@@ -1,6 +1,6 @@
 //function to delete all password change requests for a user
 const delete_request = (db, id) => {
-    db("password_reset_requests")
+    db("pw_reset_requests")
         .where("uid", "=", id)
         .del()
         .then(() => {
@@ -78,7 +78,7 @@ module.exports.change_password = (req, res, dbinfo, knex, bcrypt) => {
                 //if email is in the database, get user id
                 const id = data[0].uid;
                 //get creation date for this request
-                db("password_reset_requests")
+                db("pw_reset_requests")
                     .select("created_at")
                     .where("uid", "=", id)
                     .andWhere("code", "=", code)

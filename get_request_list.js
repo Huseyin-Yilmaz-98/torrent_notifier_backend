@@ -17,21 +17,25 @@ module.exports.get_request_list = (req, res, dbinfo, knex) => {
     const db = knex(dbinfo);
 
     db("requests")
-        .join("movies", "requests.mid", "movies.mid")
-        .join("releases", "requests.rid", "releases.rid")
-        .select("requests.mid", "releases.rname_eng", "releases.rname_tr", "movies.mname")
+        .join("titles", "requests.tid", "titles.tid")
+        .join("versions", "requests.vid", "versions.vid")
+        .select("requests.tid", "versions.name_en", "versions.name_tr", "titles.name", "titles.year", "requests.season", "requests.episode")
         .where("requests.uid", "=", req.session.user_id)
+        .orderBy("requests.added_date", "asc")
         .then(data => {
             const processed = [];
             data.forEach(entry => {
-                if (processed.indexOf(entry.mid) === -1) {
+                const stringToCheck = entry.tid + " " + entry.season + " " + entry.episode
+                if (processed.indexOf(stringToCheck) === -1) {
                     response.requests.push({
-                        mname: entry.mname,
-                        mid: entry.mid,
-                        releases_tr: data.filter((entry2) => entry.mid === entry2.mid).map((entry2) => entry2.rname_tr).join(", "),
-                        releases_en: data.filter((entry2) => entry.mid === entry2.mid).map((entry2) => entry2.rname_eng).join(", ")
+                        name: entry.name + (entry.year === "0000" ? "" : (" (" + entry.year + ")")),
+                        tid: entry.tid,
+                        versions_tr: data.filter((entry2) => [entry.tid, entry.season, entry.episode].toString() === [entry2.tid, entry2.season, entry2.episode].toString()).map((entry2) => entry2.name_tr).join(", "),
+                        versions_en: data.filter((entry2) => [entry.tid, entry.season, entry.episode].toString() === [entry2.tid, entry2.season, entry2.episode].toString()).map((entry2) => entry2.name_en).join(", "),
+                        season: entry.season,
+                        episode: entry.episode
                     })
-                    processed.push(entry.mid);
+                    processed.push(stringToCheck);
                 }
             });
             response.status = "OK";

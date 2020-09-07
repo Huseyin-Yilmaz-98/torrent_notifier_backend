@@ -64,23 +64,23 @@ module.exports.forgot_password = (req, res, dbinfo, knex) => {
         })
         .then(() => {
             if (isUserFound && user_id !== null) {
-                db("password_reset_requests")
+                db("pw_reset_requests")
                     .where("uid", "=", user_id)
                     .del()
-                    .catch(err=>console.log("couldnt delete"))
+                    .catch(err => console.log("couldnt delete"))
                     .finally(() => {
                         const randomCode = Math.floor(100000 + Math.random() * 900000);
                         db.insert({
-                            code: randomCode,
+                            code: randomCode.toString(),
                             uid: user_id,
-                            created_at: new Date()
+                            created_at: new Date(),
+                            is_used: false
                         })
-                            .into("password_reset_requests")
-                            .returning("prr_id")
+                            .into("pw_reset_requests")
                             .then(() => {
-                                const url=new URL("/reset_password", info["frontend-address"]);
-                                url.searchParams.append("email",email);
-                                url.searchParams.append("code",randomCode.toString());
+                                const url = new URL("/reset_password", info["frontend-address"]);
+                                url.searchParams.append("email", email);
+                                url.searchParams.append("code", randomCode.toString());
                                 const mailOptions = {
                                     from: info["email-username"],
                                     to: email,

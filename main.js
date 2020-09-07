@@ -1,9 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcrypt-nodejs");
+const useragent = require('express-useragent');
 const cors = require("cors");
 const knex = require("knex");
-const { json } = require("express");
-const { releases } = require("./releases");
 const { login } = require("./login");
 const { register } = require("./register");
 const { movie_info } = require("./movie_info");
@@ -17,11 +16,14 @@ const { logout } = require("./logout");
 const { check_status } = require("./check_status");
 const info = require("./info.json");
 const { get_request_list } = require("./get_request_list");
+const { delete_request } = require("./delete_request");
 const app = express();
+
+app.use(useragent.express());
 
 app.use(express.json());
 
-app.use(cors({ credentials: true, origin: info["cors-origin"] }));
+app.use(cors({ credentials: true, origin: info["frontend-address"] }));
 
 app.use(session({
     secret: info["session-secret"],
@@ -31,24 +33,32 @@ app.use(session({
 }));
 
 const dbinfo = {
-    client: 'pg',
+    client: 'mysql',
     connection: info["database-credentials"]
 }
 
+const isBot = (req, res, funcToCall) => {
+    if (req.useragent.isBot) {
+        res.status(400).json({ success: false });
+    }
+    else {
+        funcToCall();
+    }
+}
 
 
-app.get("/releases", (req, res) => releases(req, res, dbinfo, knex));
-app.post("/login", (req, res) => login(req, res, dbinfo, knex, bcrypt));
-app.post("/register", (req, res) => register(req, res, dbinfo, knex, bcrypt));
-app.post("/movie_info", (req, res) => movie_info(req, res, dbinfo, knex));
-app.post("/add_request", (req, res) => add_request(req, res, dbinfo, knex));
-app.post("/forgot_password", (req, res) => forgot_password(req, res, dbinfo, knex));
-app.post("/get_suggestions", (req, res) => get_suggestions(req, res));
-app.post("/password_reset_code_check", (req, res) => password_reset_code_check(req, res, dbinfo, knex));
-app.post("/change_password", (req, res) => change_password(req, res, dbinfo, knex, bcrypt));
-app.get("/logout", (req, res) => logout(req, res));
-app.get("/check_status", (req, res) => check_status(req, res, dbinfo, knex));
-app.get("/get_request_list", (req, res) => get_request_list(req, res, dbinfo, knex));
+app.post("/login", (req, res) => isBot(req, res, () => login(req, res, dbinfo, knex, bcrypt)));
+app.post("/register", (req, res) => isBot(req, res, () => register(req, res, dbinfo, knex, bcrypt)));
+app.post("/movie_info", (req, res) => isBot(req, res, () => movie_info(req, res, dbinfo, knex)));
+app.post("/add_request", (req, res) => isBot(req, res, () => add_request(req, res, dbinfo, knex)));
+app.post("/forgot_password", (req, res) => isBot(req, res, () => forgot_password(req, res, dbinfo, knex)));
+app.post("/get_suggestions", (req, res) => isBot(req, res, () => get_suggestions(req, res)));
+app.post("/password_reset_code_check", (req, res) => isBot(req, res, () => password_reset_code_check(req, res, dbinfo, knex)));
+app.post("/change_password", (req, res) => isBot(req, res, () => change_password(req, res, dbinfo, knex, bcrypt)));
+app.get("/logout", (req, res) => isBot(req, res, () => logout(req, res)));
+app.get("/check_status", (req, res) => isBot(req, res, () => check_status(req, res, dbinfo, knex)));
+app.get("/get_request_list", (req, res) => isBot(req, res, () => get_request_list(req, res, dbinfo, knex)));
+app.post("/delete_request", (req, res) => isBot(req, res, () => delete_request(req, res, dbinfo, knex)));
 
 
 app.listen(3333, () => console.log("app is running"));

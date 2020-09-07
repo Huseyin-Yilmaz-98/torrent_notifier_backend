@@ -16,7 +16,7 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
     //if movie_id is missing, return error
     if (!req.body.movie_id) {
         response.status = "movie_id_missing";
-        res.status(400).json(response);
+        res.status(400).json(response); xerip
         return;
     }
 
@@ -40,8 +40,8 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
         return;
     }
 
-    //check if formats is list
-    if (typeof formats !== typeof ["a", 5]) {
+    //check if formats is an array
+    if (!Array.isArray(formats)) {
         response.status = "formats_not_list";
         res.status(400).json(response);
         return;
@@ -60,13 +60,26 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
     //define variable for movie match
     let isMovieFound = false;
 
+    let season = -1;
+    let episode = -1;
+
     //get the movie from database
     db.select("*")
-        .from("movies")
-        .where("mid", "=", movie_id)
+        .from("titles")
+        .where("tid", "=", movie_id)
         .then(data => {
             if (data.length > 0) { //check if movie is in the database
                 isMovieFound = true;
+                if (data[0].type === "TVSeries" && req.body.season && typeof req.body.season === typeof "" && req.body.episode && typeof req.body.episode === typeof "") {
+                    const episodeNumber = parseInt(req.body.episode);
+                    const seasonNumber = parseInt(req.body.season);
+                    if (seasonNumber !== NaN && seasonNumber > -1 && seasonNumber < 100) {
+                        season = seasonNumber;
+                        if (episodeNumber !== NaN && episodeNumber > -1 && episodeNumber < 100) {
+                            episode = episodeNumber;
+                        }
+                    }
+                }
             }
             else { //if the movie is not found, return error
                 response.status = "invalid_movie_id";
@@ -85,20 +98,23 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
             if (isMovieFound) { //if the movie is found in the database, delete all previous requests for this movie from this user
                 db("requests")
                     .where("uid", "=", id)
-                    .andWhere("mid", "=", movie_id)
+                    .andWhere("tid", "=", movie_id)
+                    .andWhere("season", "=", season)
+                    .andWhere("episode", "=", episode)
                     .del()
                     .then(data => {
                         console.log(data + " silindi");
                     })
                     .then(() => {
                         //add all request entries to a list
-                        const toAdd = [];
-                        formats.forEach(element => {
-                            toAdd.push({
-                                rid: element,
-                                mid: movie_id,
+                        const toAdd = formats.map(element => {
+                            return ({
+                                vid: element,
+                                tid: movie_id,
                                 uid: id,
-                                r_added_date: new Date()
+                                added_date: new Date(),
+                                season: season,
+                                episode: episode
                             });
                         });
                         //insert all requests to database

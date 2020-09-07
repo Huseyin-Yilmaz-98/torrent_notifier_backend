@@ -36,7 +36,7 @@ module.exports.password_reset_code_check = (req, res, dbinfo, knex) => {
         .where("email", "=", email)
         .then(data => {
             if (data.length > 0) {
-                db("password_reset_requests")
+                db("pw_reset_requests")
                     .select("created_at")
                     .where("uid", "=", data[0].uid)
                     .andWhere("code", "=", code)
