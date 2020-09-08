@@ -1,4 +1,4 @@
-module.exports.delete_request = (req, res, dbinfo, knex) => {
+module.exports.delete_request = (req, res, db) => {
 
     //create response
     const response = {
@@ -24,8 +24,7 @@ module.exports.delete_request = (req, res, dbinfo, knex) => {
     //get movie_id from body
     const { movie_id } = req.body;
 
-    //connect to database
-    const db = knex(dbinfo);
+
 
     db("requests")
         .where("uid", "=", req.session.user_id)

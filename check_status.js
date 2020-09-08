@@ -1,16 +1,15 @@
-module.exports.check_status = (req, res, dbinfo, knex) => {
+module.exports.check_status = (req, res, db) => {
     const response = {
         signedIn: false,
         user: {}
     }
 
+   
     if (!req.session.user_id) {
         res.json(response);
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
 
     db.select("*")
         .from("users")
@@ -26,12 +25,11 @@ module.exports.check_status = (req, res, dbinfo, knex) => {
                 response.signedIn = true;
             }
             res.json(response);
-            db.destroy();
+            
         })
         .catch(err => {
             console.log(err);
             res.json(response);
-            db.destroy();
+            
         })
-
 }

@@ -3,16 +3,9 @@ const delete_request = (db, id) => {
     db("pw_reset_requests")
         .where("uid", "=", id)
         .del()
-        .then(() => {
-            db.destroy();
-        })
-        .catch((err) => {
-            console.log(err);
-            db.destroy();
-        })
 }
 
-module.exports.change_password = (req, res, dbinfo, knex, bcrypt) => {
+module.exports.change_password = (req, res, db, bcrypt) => {
     //create response
     const response = {
         success: false,
@@ -66,8 +59,6 @@ module.exports.change_password = (req, res, dbinfo, knex, bcrypt) => {
     //convert password into hash
     const hash = bcrypt.hashSync(password);
 
-    //connect to database
-    const db = knex(dbinfo);
 
     //check if email is in the database
     db.select("*")
@@ -102,39 +93,39 @@ module.exports.change_password = (req, res, dbinfo, knex, bcrypt) => {
                                         console.log(err);
                                         response.status = "db_error";
                                         res.status(400).json(response);
-                                        db.destroy();
+                                        
                                     })
                             }
                             else {
                                 response.status = "expired";
                                 res.status(400).json(response);
-                                db.destroy();
+                                
                             }
                         }
                         else {
                             response.status = "request_not_found";
                             res.status(400).json(response);
-                            db.destroy();
+                            
                         }
                     })
                     .catch(err => {
                         console.log(err);
                         response.status = "db_error";
                         res.status(400).json(response);
-                        db.destroy();
+                        
                     })
             }
             else {
                 response.status = "email_not_found";
                 res.status(400).json(response);
-                db.destroy();
+                
             }
         })
         .catch(err => {
             console.log(err);
             response.status = "db_error";
             res.status(400).json(response);
-            db.destroy();
+            
         })
 
 }

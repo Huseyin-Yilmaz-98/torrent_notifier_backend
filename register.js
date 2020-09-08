@@ -1,4 +1,4 @@
-module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
+module.exports.register = (req, res, db, bcrypt) => {
     //create response
     const response = {
         success: false,
@@ -65,8 +65,6 @@ module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
     //convert password to hash
     const hash = bcrypt.hashSync(password);
 
-    //connect to database
-    const db = knex(dbinfo);
 
     let isRegistered = false;
     //check if email is registered
@@ -78,7 +76,7 @@ module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
                 isRegistered = true;
                 response.status = "email_registered";
                 res.status(400).json(response);
-                db.destroy();
+                
             }
         })
         .catch(err => {
@@ -87,7 +85,7 @@ module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
             isRegistered = true;
             response.status = "error_checking";
             res.status(400).json(response);
-            db.destroy();
+            
         }).then(() => {
             //if email is not registered, try registering the user
             if (isRegistered === false) {
@@ -111,14 +109,14 @@ module.exports.register = (req, res, dbinfo, knex, bcrypt) => {
                                 response.status = "OK";
                                 req.session.user_id = data[0].uid;
                                 res.json(response);
-                                db.destroy();
+                                
                             })
                     })
                     .catch(err => {
                         console.log(err);
                         response.status = "db_error";
                         res.status(400).json(response);
-                        db.destroy();
+                        
                     })
             }
         })

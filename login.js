@@ -1,4 +1,4 @@
-module.exports.login = (req, res, dbinfo, knex, bcrypt) => {
+module.exports.login = (req, res, db, bcrypt) => {
     //create response
     const response = {
         success: false,
@@ -32,8 +32,6 @@ module.exports.login = (req, res, dbinfo, knex, bcrypt) => {
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
 
     //check if user credentials match
     db.select("*")
@@ -43,7 +41,6 @@ module.exports.login = (req, res, dbinfo, knex, bcrypt) => {
             if (data.length === 0) {
                 response.status = "email_not_registered";
                 res.status(400).json(response);
-                db.destroy();
             }
             else {
                 if (bcrypt.compareSync(password, data[0].password_hash)) {
@@ -57,18 +54,15 @@ module.exports.login = (req, res, dbinfo, knex, bcrypt) => {
                     response.success = true;
                     req.session.user_id = data[0].uid;
                     res.json(response);
-                    db.destroy();
                 }
                 else {
                     response.status = "wrong_password";
                     res.json(response);
-                    db.destroy();
                 }
             }
         }).catch(err => {
             console.log(err);
             response.status = "db_error";
             res.status(400).json(response);
-            db.destroy();
         })
 }

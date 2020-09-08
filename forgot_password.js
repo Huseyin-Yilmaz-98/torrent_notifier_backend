@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 });
 
 
-module.exports.forgot_password = (req, res, dbinfo, knex) => {
+module.exports.forgot_password = (req, res, db) => {
 
     //create response
     const response = {
@@ -35,8 +35,6 @@ module.exports.forgot_password = (req, res, dbinfo, knex) => {
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
 
     //define a variable for user match
     let isUserFound = false;
@@ -53,14 +51,14 @@ module.exports.forgot_password = (req, res, dbinfo, knex) => {
             else {
                 response.status = "invalid_credentials";
                 res.status(400).json(response);
-                db.destroy();
+                
             }
         })
         .catch(err => {
             console.log(err);
             response.status = "db_error";
             res.status(400).json(response);
-            db.destroy();
+            
         })
         .then(() => {
             if (isUserFound && user_id !== null) {
@@ -92,13 +90,13 @@ module.exports.forgot_password = (req, res, dbinfo, knex) => {
                                         console.log(error);
                                         response.status = "mail_not_sent";
                                         res.status(400).json(response);
-                                        db.destroy();
+                                        
                                     } else {
                                         console.log("Sent " + info.response);
                                         response.status = "OK";
                                         response.success = true;
                                         res.json(response);
-                                        db.destroy();
+                                        
                                     }
                                 });
                             })

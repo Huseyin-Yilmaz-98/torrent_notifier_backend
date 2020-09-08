@@ -1,4 +1,4 @@
-module.exports.get_request_list = (req, res, dbinfo, knex) => {
+module.exports.get_request_list = (req, res, db) => {
     //create response
     const response = {
         success: false,
@@ -13,8 +13,7 @@ module.exports.get_request_list = (req, res, dbinfo, knex) => {
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
+
 
     db("requests")
         .join("titles", "requests.tid", "titles.tid")

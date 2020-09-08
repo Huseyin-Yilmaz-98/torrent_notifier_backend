@@ -34,7 +34,7 @@ const add_to_database = (response, db, movie_id) => {
         })
 }
 
-module.exports.movie_info = (req, res, dbinfo, knex) => {
+module.exports.movie_info = (req, res, db) => {
     //create response
     const response = {
         success: false,
@@ -68,8 +68,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
+
 
 
     let isSuccessful = false;
@@ -95,7 +94,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
                     .then(formats => {
                         response.formats = formats;
                         res.json(response);
-                        db.destroy();
+                        
                     })
             }
             else {
@@ -107,7 +106,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
                         if (sj.length === 0) {
                             response.status = "parsing_error";
                             res.status(400).json(response);
-                            db.destroy();
+                            
                         }
                         else {
                             movie_info = JSON.parse(sj);
@@ -132,7 +131,7 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
                                 .then(formats => {
                                     response.formats = formats;
                                     res.json(response);
-                                    db.destroy();
+                                    
                                 })
                         }
                     });
@@ -141,6 +140,6 @@ module.exports.movie_info = (req, res, dbinfo, knex) => {
         .catch(err => {
             response.status = "db_error";
             res.status(400).json(response);
-            db.destroy();
+            
         });
 }

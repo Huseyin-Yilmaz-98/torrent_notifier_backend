@@ -1,4 +1,4 @@
-module.exports.add_request = (req, res, dbinfo, knex) => {
+module.exports.add_request = (req, res, db) => {
 
     //create response
     const response = {
@@ -54,12 +54,11 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
 
     //define variable for movie match
     let isMovieFound = false;
 
+    //initial season and episode info is set to -1 which means no season or episode is selected
     let season = -1;
     let episode = -1;
 
@@ -70,12 +69,14 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
         .then(data => {
             if (data.length > 0) { //check if movie is in the database
                 isMovieFound = true;
+                //if title is a tv series, check season and episode info, they can be an integer from 0 to 99, -1 means no selection
                 if (data[0].type === "TVSeries" && req.body.season && typeof req.body.season === typeof "" && req.body.episode && typeof req.body.episode === typeof "") {
                     const episodeNumber = parseInt(req.body.episode);
                     const seasonNumber = parseInt(req.body.season);
                     if (seasonNumber !== NaN && seasonNumber > -1 && seasonNumber < 100) {
                         season = seasonNumber;
-                        if (episodeNumber !== NaN && episodeNumber > -1 && episodeNumber < 100) {
+                        //only if season info is provided, episode selection will be put into consideration
+                        if (episodeNumber !== NaN && episodeNumber > -1 && episodeNumber < 100) { 
                             episode = episodeNumber;
                         }
                     }
@@ -84,7 +85,7 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
             else { //if the movie is not found, return error
                 response.status = "invalid_movie_id";
                 res.status(400).json(response);
-                db.destroy();
+                
             }
         })
         //if something goes wrong, return error
@@ -92,10 +93,10 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
             console.log(err);
             response.status = "db_error";
             res.status(400).json(response);
-            db.destroy();
+            
         })
         .then(() => {
-            if (isMovieFound) { //if the movie is found in the database, delete all previous requests for this movie from this user
+            if (isMovieFound) { //if the movie is found in the database, delete all previous requests for this title, episode and season from this user
                 db("requests")
                     .where("uid", "=", id)
                     .andWhere("tid", "=", movie_id)
@@ -103,7 +104,7 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
                     .andWhere("episode", "=", episode)
                     .del()
                     .then(data => {
-                        console.log(data + " silindi");
+                        console.log(data + " deleted");
                     })
                     .then(() => {
                         //add all request entries to a list
@@ -125,14 +126,14 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
                                 response.success = true;
                                 response.status = "OK";
                                 res.json(response);
-                                db.destroy();
+                                
                             })
                             .catch((err) => {
                                 //if an error occured while inserting requests, respond with error
                                 console.log(err);
                                 response.status = "error_inserting";
                                 res.status(400).json(response);
-                                db.destroy();
+                                
                             })
                     })
             }
@@ -140,7 +141,7 @@ module.exports.add_request = (req, res, dbinfo, knex) => {
                 //if the movie is not found in the database, return an error
                 response.status = "movie_not_in_database";
                 res.status(400).json(response);
-                db.destroy();
+                
             }
         })
 

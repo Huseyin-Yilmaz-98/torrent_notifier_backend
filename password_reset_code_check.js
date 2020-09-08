@@ -1,4 +1,4 @@
-module.exports.password_reset_code_check = (req, res, dbinfo, knex) => {
+module.exports.password_reset_code_check = (req, res, db) => {
     //create response
     const response = {
         success: false,
@@ -28,8 +28,6 @@ module.exports.password_reset_code_check = (req, res, dbinfo, knex) => {
         return;
     }
 
-    //connect to database
-    const db = knex(dbinfo);
 
     db.select("*")
         .from("users")
@@ -48,37 +46,37 @@ module.exports.password_reset_code_check = (req, res, dbinfo, knex) => {
                                 response.success = true;
                                 response.status = "OK";
                                 res.json(response);
-                                db.destroy();
+                                
                             }
                             else {
                                 response.status = "expired";
                                 res.status(400).json(response);
-                                db.destroy();
+                                
                             }
                         }
                         else {
                             response.status = "request_not_found";
                             res.status(400).json(response);
-                            db.destroy();
+                            
                         }
                     })
                     .catch(err => {
                         console.log(err);
                         response.status = "db_error";
                         res.status(400).json(response);
-                        db.destroy();
+                        
                     })
             }
             else {
                 response.status = "email_not_found";
                 res.status(400).json(response);
-                db.destroy();
+                
             }
         })
         .catch(err => {
             console.log(err);
             response.status = "db_error";
             res.status(400).json(response);
-            db.destroy();
+            
         })
 }

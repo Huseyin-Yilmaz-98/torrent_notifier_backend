@@ -15,6 +15,7 @@
     "bcrypt-nodejs": "0.0.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.1",
     "express-useragent": "^1.0.15",
     "jsdom": "^16.3.0",
