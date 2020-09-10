@@ -18,6 +18,9 @@ const express = require("express");
 const bcrypt = require("bcrypt-nodejs");
 const useragent = require('express-useragent');
 const app = express();
+const fs = require("fs");
+const https = require("https");
+const http = require("http");
 const MySQLStore = require('express-mysql-session')(session);
 
 app.use(useragent.express()); //middleware that handles user-agent header
@@ -80,4 +83,22 @@ app.get("/get_request_list", (req, res) => isBot(req, res, () => get_request_lis
 app.post("/delete_request", (req, res) => isBot(req, res, () => delete_request(req, res, db)));
 
 
-app.listen(info.port, () => console.log("app is running on "+info.port));
+https
+    .createServer(
+        {
+            key: fs.readFileSync("private.key"),
+            cert: fs.readFileSync("certificate.crt"),
+            ca: fs.readFileSync("ca_bundle.crt"),
+        },
+        app
+    )
+    .listen(443, () => console.log("app working on port 443"));
+
+http
+    .createServer((req, res) => {
+        res.writeHead(301, {
+            Location: "https://" + req.headers["host"] + req.url,
+        });
+        res.end();
+    })
+    .listen(80, () => console.log("also 80"));
