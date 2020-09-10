@@ -80,4 +80,4 @@ app.get("/get_request_list", (req, res) => isBot(req, res, () => get_request_lis
 app.post("/delete_request", (req, res) => isBot(req, res, () => delete_request(req, res, db)));
 
 
-app.listen(3333, () => console.log("app is running"));
+app.listen(info.port, () => console.log("app is running on "+info.port));
