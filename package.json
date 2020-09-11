@@ -18,10 +18,10 @@
     "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.1",
     "express-useragent": "^1.0.15",
-    "jsdom": "^16.3.0",
-    "knex": "^0.21.2",
+    "jsdom": "^16.4.0",
+    "knex": "^0.21.5",
     "mysql": "^2.18.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.11"
   }
 }

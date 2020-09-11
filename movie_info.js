@@ -68,6 +68,12 @@ module.exports.movie_info = (req, res, db) => {
         return;
     }
 
+    //check if movie_id pattern is valid
+    if (!/tt[0-9]*/.test(movie_id)) {
+        response.status = "parsing_error";
+        res.status(400).json(response);
+    }
+
 
 
 
