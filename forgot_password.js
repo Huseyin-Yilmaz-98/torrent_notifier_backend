@@ -2,11 +2,13 @@ const nodemailer = require('nodemailer');
 const info = require("./info.json");
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.yandex.ru',
+    port: 465,
     auth: {
         user: info["email-username"],
         pass: info["email-password"]
-    }
+    },
+    secure: true
 });
 
 
