@@ -3,3 +3,4 @@ node_modules
 ca_bundle.crt
 certificate.crt
 private.key
+package-lock.json
