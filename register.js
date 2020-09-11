@@ -56,7 +56,7 @@ module.exports.register = (req, res, db, bcrypt) => {
 
     //check if email contains @ and .
     const email_split = email.split("@");
-    if (email_split.length !== 2 || email_split[0].length === 0 || email_split.split(".").length !== 2) { //check if email contains @ and .
+    if (email_split.length !== 2 || email_split[0].length === 0 || email_split[1].split(".").length !== 2) { //check if email contains @ and .
         response.status = "email_wrong_pattern";
         res.status(400).json(response);
         return;
