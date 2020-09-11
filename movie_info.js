@@ -90,11 +90,11 @@ module.exports.movie_info = (req, res, db) => {
                 response.success = true;
                 db.select("*")
                     .from("versions")
-                    .orderBy("level","desc")
+                    .orderBy("level", "desc")
                     .then(formats => {
                         response.formats = formats;
                         res.json(response);
-                        
+
                     })
             }
             else {
@@ -106,7 +106,7 @@ module.exports.movie_info = (req, res, db) => {
                         if (sj.length === 0) {
                             response.status = "parsing_error";
                             res.status(400).json(response);
-                            
+
                         }
                         else {
                             movie_info = JSON.parse(sj);
@@ -127,19 +127,23 @@ module.exports.movie_info = (req, res, db) => {
                             response.success = true;
                             db.select("*")
                                 .from("versions")
-                                .orderBy("level","desc")
+                                .orderBy("level", "desc")
                                 .then(formats => {
                                     response.formats = formats;
                                     res.json(response);
-                                    
+
                                 })
                         }
-                    });
+                    })
+                    .catch(() => {
+                        response.status = "parsing_error";
+                        res.status(400).json(response);
+                    })
             }
         })
         .catch(err => {
             response.status = "db_error";
             res.status(400).json(response);
-            
+
         });
 }
