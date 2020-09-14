@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const info = require("./info.json");
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.yandex.ru',
+    host: 'smtp-relay.gmail.com',
     port: 465,
     auth: {
         user: info["email-username"],
