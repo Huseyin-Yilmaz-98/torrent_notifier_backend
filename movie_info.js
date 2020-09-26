@@ -134,12 +134,11 @@ module.exports.movie_info = (req, res, db) => {
                             response.success = true;
                             db.select("*")
                                 .from("versions")
-                                .orderBy("category","desc")
                                 .orderBy("level", "desc")
+                                .orderBy("category", "desc")
                                 .then(formats => {
                                     response.formats = formats;
                                     res.json(response);
-
                                 })
                         }
                     })
