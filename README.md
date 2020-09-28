@@ -21,7 +21,7 @@ An info.json files is also required for the app to work. This file contains priv
         "frontend-address": "frontend-address"
     }
 
-A MYSQL 8.0 was used to store data. Sessions are already stored in this database. Knex.js was used to manage database transactions. The database schema is as follows:
+A MYSQL 8.0 database was used to store data. Sessions are already stored in this database. Knex.js was used to manage database transactions. The database schema is as follows:
 
 ![database](https://github.com/Xeraphin/torrent_notifier_tracker/blob/master/images/database.png?raw=true)
 
