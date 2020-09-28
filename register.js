@@ -76,7 +76,6 @@ module.exports.register = (req, res, db, bcrypt) => {
                 isRegistered = true;
                 response.status = "email_registered";
                 res.status(400).json(response);
-
             }
         })
         .catch(err => {
@@ -85,8 +84,8 @@ module.exports.register = (req, res, db, bcrypt) => {
             isRegistered = true;
             response.status = "error_checking";
             res.status(400).json(response);
-
-        }).then(() => {
+        })
+        .then(() => {
             //if email is not registered, try registering the user
             if (isRegistered === false) {
                 const randomCode = Math.floor(100000 + Math.random() * 900000);
