@@ -4,12 +4,10 @@ module.exports.check_status = (req, res, db) => {
         user: {}
     }
 
-   
     if (!req.session.user_id) {
         res.json(response);
         return;
     }
-
 
     db.select("*")
         .from("users")
@@ -25,7 +23,6 @@ module.exports.check_status = (req, res, db) => {
                 response.signedIn = true;
             }
             res.json(response);
-            
         })
         .catch(err => {
             console.log(err);

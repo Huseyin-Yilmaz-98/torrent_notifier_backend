@@ -24,8 +24,6 @@ module.exports.delete_request = (req, res, db) => {
     //get movie_id from body
     const { movie_id } = req.body;
 
-
-
     db("requests")
         .where("uid", "=", req.session.user_id)
         .andWhere("tid", "=", movie_id)

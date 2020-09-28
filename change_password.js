@@ -93,13 +93,11 @@ module.exports.change_password = (req, res, db, bcrypt) => {
                                         console.log(err);
                                         response.status = "db_error";
                                         res.status(400).json(response);
-                                        
                                     })
                             }
                             else {
                                 response.status = "expired";
                                 res.status(400).json(response);
-                                
                             }
                         }
                         else {
@@ -112,20 +110,16 @@ module.exports.change_password = (req, res, db, bcrypt) => {
                         console.log(err);
                         response.status = "db_error";
                         res.status(400).json(response);
-                        
                     })
             }
             else {
                 response.status = "email_not_found";
                 res.status(400).json(response);
-                
             }
         })
         .catch(err => {
             console.log(err);
             response.status = "db_error";
             res.status(400).json(response);
-            
         })
-
 }

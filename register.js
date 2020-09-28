@@ -76,7 +76,7 @@ module.exports.register = (req, res, db, bcrypt) => {
                 isRegistered = true;
                 response.status = "email_registered";
                 res.status(400).json(response);
-                
+
             }
         })
         .catch(err => {
@@ -85,7 +85,7 @@ module.exports.register = (req, res, db, bcrypt) => {
             isRegistered = true;
             response.status = "error_checking";
             res.status(400).json(response);
-            
+
         }).then(() => {
             //if email is not registered, try registering the user
             if (isRegistered === false) {
@@ -96,7 +96,8 @@ module.exports.register = (req, res, db, bcrypt) => {
                     joined_date: new Date(),
                     name: name,
                     activation_code: randomCode,
-                    is_activated: false
+                    is_activated: false,
+                    language: req.body.lang ? req.body.lang : "en"
                 })
                     .into("users")
                     .then((data) => {
@@ -109,14 +110,14 @@ module.exports.register = (req, res, db, bcrypt) => {
                                 response.status = "OK";
                                 req.session.user_id = data[0].uid;
                                 res.json(response);
-                                
+
                             })
                     })
                     .catch(err => {
                         console.log(err);
                         response.status = "db_error";
                         res.status(400).json(response);
-                        
+
                     })
             }
         })

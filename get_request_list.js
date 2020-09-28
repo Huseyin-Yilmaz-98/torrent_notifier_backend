@@ -13,8 +13,6 @@ module.exports.get_request_list = (req, res, db) => {
         return;
     }
 
-
-
     db("requests")
         .join("titles", "requests.tid", "titles.tid")
         .join("versions", "requests.vid", "versions.vid")

@@ -75,7 +75,7 @@ module.exports.add_request = (req, res, db) => {
                     const seasonNumber = parseInt(req.body.season);
                     if (seasonNumber !== NaN && seasonNumber > -1 && seasonNumber < 100) {
                         season = seasonNumber;
-                        //only if season info is provided, episode selection will be put into consideration
+                        //only in the event that a season info is provided, episode selection will be put into consideration
                         if (episodeNumber !== NaN && episodeNumber > -1 && episodeNumber < 100) { 
                             episode = episodeNumber;
                         }
@@ -85,7 +85,6 @@ module.exports.add_request = (req, res, db) => {
             else { //if the movie is not found, return error
                 response.status = "invalid_movie_id";
                 res.status(400).json(response);
-                
             }
         })
         //if something goes wrong, return error
@@ -126,14 +125,12 @@ module.exports.add_request = (req, res, db) => {
                                 response.success = true;
                                 response.status = "OK";
                                 res.json(response);
-                                
                             })
                             .catch((err) => {
                                 //if an error occured while inserting requests, respond with error
                                 console.log(err);
                                 response.status = "error_inserting";
                                 res.status(400).json(response);
-                                
                             })
                     })
             }
@@ -141,7 +138,6 @@ module.exports.add_request = (req, res, db) => {
                 //if the movie is not found in the database, return an error
                 response.status = "movie_not_in_database";
                 res.status(400).json(response);
-                
             }
         })
 

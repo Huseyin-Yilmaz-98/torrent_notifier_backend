@@ -39,7 +39,8 @@ app.use(session({
     store: sessionStore
 })); //create session manager
 
-setInterval(() => sessionStore.clearExpiredSessions(), 3600000); //clear expired sessions once every hour
+//clear expired sessions once every hour
+setInterval(() => sessionStore.clearExpiredSessions(), 3600000);
 
 const dbinfo = {
     client: 'mysql',
@@ -49,17 +50,18 @@ const dbinfo = {
 
 let db = knex(dbinfo); //create database connection
 
+//once every 5 minutes, check if the database connection is still active, if not, restore the connection
 setInterval(() => {
     db
-        .raw("select 1 as a")
+        .raw("SELECT 1 AS a")
         .catch(() => {
             db = knex(dbinfo);
             console.log("reconnected to database");
         });
-}, 600000); //once every 5 minutes, check if the database connection is still active, if not, restore the connection
+}, 600000);
 
-
-const isBot = (req, res, funcToCall) => { //each request goes through this function first, if it is not a bot, the request is handled
+//each request goes through this function first, if it is not a bot, the request is handled
+const isBot = (req, res, funcToCall) => {
     if (req.useragent.isBot) {
         res.status(400).json({ success: false });
     }

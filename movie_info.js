@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const { JSDOM } = require("jsdom");
 const { json } = require('express');
 
+//takes an html body and returns the script that contains title info
 const get_script = (body => {
     const dom = new JSDOM(body);
     const scripts = dom.window.document.querySelectorAll('script');
@@ -15,6 +16,10 @@ const get_script = (body => {
 
 //adds movie to the database
 const add_to_database = (response, db, movie_id) => {
+    if (response.movie_info.year.length !== 4) {
+        response.movie_info.year = "0000";
+    }
+
     db.insert({
         tid: movie_id,
         name: response.movie_info.name,
@@ -75,12 +80,26 @@ module.exports.movie_info = (req, res, db) => {
         return;
     }
 
+    const respond_with_success = () => {
+        response.status = "OK";
+        response.success = true;
+        db.select("*")
+            .from("versions")
+            .orderBy("category", "desc")
+            .orderBy("level", "desc")
+            .then(formats => {
+                response.formats = formats;
+                res.json(response);
+            })
+    }
+
     let isSuccessful = false;
     db.select("*")
         .from("titles")
         .where("tid", "=", movie_id)
         .then(data => {
             if (data.length > 0) {
+
                 response.movie_info.movie_id = movie_id;
                 response.movie_info.name = data[0].name;
                 response.movie_info.sum = data[0].sum;
@@ -88,19 +107,10 @@ module.exports.movie_info = (req, res, db) => {
                 response.movie_info.year = data[0].year;
                 response.movie_info.poster = data[0].poster;
                 response.movie_info.type = data[0].type;
+
                 isSuccessful = true;
                 console.log("from database");
-                response.status = "OK";
-                response.success = true;
-                db.select("*")
-                    .from("versions")
-                    .orderBy("category", "desc")
-                    .orderBy("level", "desc")
-                    .then(formats => {
-                        response.formats = formats;
-                        res.json(response);
-
-                    })
+                respond_with_success();
             }
             else {
                 const url = "https://www.imdb.com/title/" + movie_id;
@@ -128,16 +138,7 @@ module.exports.movie_info = (req, res, db) => {
                     .then(() => {
                         if (isSuccessful) {
                             add_to_database(response, db, movie_id);
-                            response.status = "OK";
-                            response.success = true;
-                            db.select("*")
-                                .from("versions")
-                                .orderBy("category", "desc")
-                                .orderBy("level", "desc")
-                                .then(formats => {
-                                    response.formats = formats;
-                                    res.json(response);
-                                })
+                            respond_with_success();
                         }
                     })
                     .catch(() => {
