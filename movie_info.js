@@ -75,9 +75,6 @@ module.exports.movie_info = (req, res, db) => {
         return;
     }
 
-
-
-
     let isSuccessful = false;
     db.select("*")
         .from("titles")
